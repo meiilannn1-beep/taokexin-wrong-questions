@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 · 陶可馨高考错题学习站</title>
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="auth-brand-mark">📚</div>
+        <div>
+          <h1>陶可馨错题集</h1>
+          <p>高考智能复习站</p>
+        </div>
+      </div>
+      <h2>欢迎回来</h2>
+      <p class="auth-sub">登录后即可查看今日复习计划和错题。</p>
+      <div class="auth-error" id="authError"></div>
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">用户名</label>
+          <input id="username" name="username" type="text" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="password">密码</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+        </div>
+        <button class="auth-btn" id="submitBtn" type="submit">登录</button>
+      </form>
+      <div class="auth-switch">
+        还没有账号？<a href="/register">创建账号</a>
+      </div>
+      <div class="auth-note">
+        建议在平板上使用 Chrome、Safari 或 Edge 浏览器，并添加到主屏幕，使用体验更接近 App。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const errorBox = document.getElementById("authError");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorBox.classList.remove("show");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "登录中…";
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value,
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || "登录失败");
+        }
+        window.location.href = "/";
+      } catch (err) {
+        showError(err.message || "网络异常，请稍后重试");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "登录";
+      }
+    });
+  </script>
+</body>
+</html>

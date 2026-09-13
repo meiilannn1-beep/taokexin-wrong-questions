@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>陶可馨 · 高考错题学习站</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">📚</div>
+        <div>
+          <div class="brand-name">陶可馨错题集</div>
+          <div class="brand-sub">高考智能复习站</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="mainNav">
+        <button class="nav-item active" data-view="dashboard">
+          <span>🏠</span><span>学习总览</span>
+        </button>
+        <button class="nav-item" data-view="plan">
+          <span>🗓️</span><span>每日计划</span>
+        </button>
+        <button class="nav-item" data-view="review">
+          <span>🧠</span><span>遗忘曲线复习</span>
+        </button>
+        <button class="nav-item" data-view="questions">
+          <span>✏️</span><span>错题本</span>
+        </button>
+        <button class="nav-item" data-view="knowledge">
+          <span>📖</span><span>知识图谱</span>
+        </button>
+        <button class="nav-item" data-view="stats">
+          <span>📊</span><span>学情分析</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-box">
+          <span id="currentUserName">未登录</span>
+          <button class="text-btn" id="logoutBtn" title="退出登录">退出</button>
+        </div>
+        <div class="countdown-chip" id="countdownChip">距离高考 -- 天</div>
+        <button class="ghost-btn" id="resetBtn">恢复示例数据</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="todayLabel">今天</div>
+          <h1 id="pageTitle">学习总览</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="primary-btn" id="quickAddBtn">＋ 录入错题</button>
+        </div>
+      </header>
+
+      <section id="view-dashboard" class="view active">
+        <div class="grid-hero">
+          <div class="card hero-card">
+            <div>
+              <div class="eyebrow">今日复习</div>
+              <div class="hero-number" id="dueCount">0</div>
+              <div class="muted">道错题到了遗忘曲线复习点</div>
+              <button class="primary-btn mt" id="startReviewBtn">开始复习</button>
+            </div>
+            <div class="hero-ring" id="heroRing">0%</div>
+          </div>
+          <div class="card">
+            <div class="card-title">今日计划完成度</div>
+            <div class="progress-large" id="dailyProgressRing">0%</div>
+            <div class="muted" id="dailyProgressText">0 / 0 项已完成</div>
+          </div>
+          <div class="card">
+            <div class="card-title">累计错题</div>
+            <div class="big-number" id="totalQuestions">0</div>
+            <div class="muted">已掌握 <span id="masteredCount">0</span> 道</div>
+          </div>
+          <div class="card">
+            <div class="card-title">连续打卡</div>
+            <div class="big-number">🔥 <span id="streakDays">0</span> 天</div>
+            <div class="muted">保持每日复习节奏</div>
+          </div>
+        </div>
+
+        <div class="grid-two">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">今日待办</div>
+              <button class="text-btn" data-goto="plan">查看计划 →</button>
+            </div>
+            <div id="todayTodoList" class="list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">薄弱知识点 TOP5</div>
+              <button class="text-btn" data-goto="stats">详细分析 →</button>
+            </div>
+            <div id="weakTopList" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-plan" class="view">
+        <div class="section-toolbar">
+          <div>
+            <h2>每日学习计划</h2>
+            <p class="muted">系统会把到期的错题自动排入今日计划，你也可以手动添加任务。</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="ghost-btn" id="autoPlanBtn">✨ 生成建议计划</button>
+            <button class="primary-btn" id="addTaskBtn">＋ 添加任务</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="plan-summary">
+            <div><span class="eyebrow">日期</span><strong id="planDate"></strong></div>
+            <div><span class="eyebrow">待完成任务</span><strong id="planTotal">0</strong></div>
+            <div><span class="eyebrow">已完成</span><strong id="planDone">0</strong></div>
+            <div><span class="eyebrow">预计用时</span><strong id="planDuration">0 分钟</strong></div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="planProgressBar"></div></div>
+          <div id="planList" class="plan-list"></div>
+        </div>
+      </section>
+
+      <section id="view-review" class="view">
+        <div class="section-toolbar">
+          <div>
+            <h2>遗忘曲线复习</h2>
+            <p class="muted">按照“当天、第 1、2、4、7、15、30 天”的节奏复习，每次测试后根据记忆质量自动调整下一次复习时间。</p>
+          </div>
+          <button class="primary-btn" id="reviewStartBtn">开始今日复习</button>
+        </div>
+
+        <div class="grid-review">
+          <div class="card">
+            <div class="card-title">艾宾浩斯记忆保持曲线</div>
+            <canvas id="forgettingChart" width="600" height="250"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-title">今日复习队列</div>
+            <div id="reviewQueueStats" class="queue-stats"></div>
+            <div id="reviewQueueList" class="list"></div>
+          </div>
+        </div>
+
+        <div class="card review-card hidden" id="reviewCard">
+          <div class="review-progress">
+            <div class="progress-track"><div class="progress-fill" id="reviewProgressBar"></div></div>
+            <span id="reviewProgressText">1 / 1</span>
+          </div>
+          <div id="reviewQuestionArea"></div>
+          <div class="review-answer hidden" id="reviewAnswerArea"></div>
+          <div class="review-actions" id="reviewActions">
+            <button class="ghost-btn" id="showAnswerBtn">显示答案</button>
+          </div>
+          <div class="grade-panel hidden" id="gradePanel">
+            <div class="grade-title">这次你记住了多少？</div>
+            <div class="grade-buttons">
+              <button class="grade-btn bad" data-score="1">😵 完全忘了</button>
+              <button class="grade-btn poor" data-score="2">😕 很模糊</button>
+              <button class="grade-btn ok" data-score="3">🙂 有点印象</button>
+              <button class="grade-btn good" data-score="4">😄 基本记得</button>
+              <button class="grade-btn perfect" data-score="5">🤩 完全掌握</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-questions" class="view">
+        <div class="section-toolbar">
+          <div>
+            <h2>错题本</h2>
+            <p class="muted">记录每日错题，绑定知识点后会自动生成薄弱点总结。</p>
+          </div>
+          <button class="primary-btn" id="addQuestionBtn">＋ 录入错题</button>
+        </div>
+        <div class="filter-bar">
+          <select id="filterSubject"><option value="all">全部学科</option></select>
+          <select id="filterMastery">
+            <option value="all">全部掌握度</option>
+            <option value="weak">薄弱</option>
+            <option value="learning">学习中</option>
+            <option value="mastered">已掌握</option>
+          </select>
+          <input id="searchInput" type="search" placeholder="搜索题目、知识点、标签…" />
+        </div>
+        <div id="questionList" class="question-grid"></div>
+      </section>
+
+      <section id="view-knowledge" class="view">
+        <div class="section-toolbar">
+          <div>
+            <h2>知识图谱</h2>
+            <p class="muted">按学科整理知识点总结、延伸与常见错误，并与你的错题自动关联。</p>
+          </div>
+          <div class="toolbar-actions">
+            <button class="ghost-btn" id="addKnowledgeBtn">＋ 添加知识点</button>
+            <button class="primary-btn" id="generateSummaryBtn">🧾 生成错题知识点总结</button>
+          </div>
+        </div>
+        <div class="subject-tabs" id="subjectTabs"></div>
+        <div class="card summary-card hidden" id="summaryCard">
+          <div class="card-header">
+            <div class="card-title">错题知识点总结</div>
+            <div>
+              <button class="ghost-btn" id="copySummaryBtn">复制总结</button>
+              <button class="ghost-btn" id="closeSummaryBtn">关闭</button>
+            </div>
+          </div>
+          <pre id="summaryText" class="summary-text"></pre>
+        </div>
+        <div id="knowledgeList" class="knowledge-grid"></div>
+      </section>
+
+      <section id="view-stats" class="view">
+        <div class="section-toolbar">
+          <div>
+            <h2>学情分析</h2>
+            <p class="muted">从错题分布、遗忘曲线和复习记录中定位薄弱环节。</p>
+          </div>
+        </div>
+        <div class="grid-two">
+          <div class="card">
+            <div class="card-title">各学科错题分布</div>
+            <div id="subjectDistribution"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">掌握度分布</div>
+            <div id="masteryDistribution"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">近 14 天复习趋势</div>
+          <div id="reviewTrend" class="trend-chart"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 错题录入 / 编辑弹窗 -->
+  <div class="modal-backdrop hidden" id="questionModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="questionModalTitle">录入错题</h3>
+        <button class="icon-btn" data-close-modal="questionModal">×</button>
+      </div>
+      <form id="questionForm" class="modal-body">
+        <input type="hidden" id="questionId" />
+        <div class="form-grid">
+          <label>学科
+            <select id="questionSubject" required></select>
+          </label>
+          <label>难度
+            <select id="questionDifficulty">
+              <option value="1">1 · 基础</option>
+              <option value="2">2 · 较易</option>
+              <option value="3" selected>3 · 中等</option>
+              <option value="4">4 · 较难</option>
+              <option value="5">5 · 困难</option>
+            </select>
+          </label>
+          <label class="full">题目来源
+            <input id="questionSource" type="text" placeholder="例如：2026 年成都二诊 · 数学第 18 题" />
+          </label>
+          <label class="full">题目内容
+            <textarea id="questionText" rows="3" required placeholder="粘贴或输入题干"></textarea>
+          </label>
+          <label class="full">正确答案 / 解法
+            <textarea id="questionAnswer" rows="3" placeholder="答案、关键步骤或完整解析"></textarea>
+          </label>
+          <label class="full">错误原因 / 分析
+            <textarea id="questionAnalysis" rows="2" placeholder="例如：三角函数图像平移方向判断错误"></textarea>
+          </label>
+          <label class="full">关联知识点（可多选）
+            <select id="questionKps" multiple size="4"></select>
+          </label>
+          <label class="full">标签
+            <input id="questionTags" type="text" placeholder="用逗号分隔，例如：函数, 图像变换" />
+          </label>
+          <label class="full">错题图片
+            <input id="questionImage" type="file" accept="image/*" />
+            <div id="imagePreview" class="image-preview hidden"></div>
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="ghost-btn" data-close-modal="questionModal">取消</button>
+          <button type="submit" class="primary-btn">保存错题</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 知识点弹窗 -->
+  <div class="modal-backdrop hidden" id="knowledgeModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>添加 / 编辑知识点</h3>
+        <button class="icon-btn" data-close-modal="knowledgeModal">×</button>
+      </div>
+      <form id="knowledgeForm" class="modal-body">
+        <input type="hidden" id="knowledgeId" />
+        <div class="form-grid">
+          <label>学科
+            <select id="knowledgeSubject" required></select>
+          </label>
+          <label>知识点名称
+            <input id="knowledgeName" required placeholder="例如：函数的单调性与最值" />
+          </label>
+          <label class="full">知识总结
+            <textarea id="knowledgeSummary" rows="4" required placeholder="核心概念、公式、解题框架"></textarea>
+          </label>
+          <label class="full">延伸拓展
+            <textarea id="knowledgeExtension" rows="3" placeholder="高考常见变形、综合应用、易忽略条件"></textarea>
+          </label>
+          <label class="full">解题技巧
+            <textarea id="knowledgeTips" rows="3" placeholder="答题模板、易错点规避方法"></textarea>
+          </label>
+          <label class="full">常见错误
+            <textarea id="knowledgeMistakes" rows="3" placeholder="学生常犯的错误与提醒"></textarea>
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="ghost-btn" data-close-modal="knowledgeModal">取消</button>
+          <button type="submit" class="primary-btn">保存知识点</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 任务弹窗 -->
+  <div class="modal-backdrop hidden" id="taskModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>添加学习任务</h3>
+        <button class="icon-btn" data-close-modal="taskModal">×</button>
+      </div>
+      <form id="taskForm" class="modal-body">
+        <div class="form-grid">
+          <label class="full">任务名称
+            <input id="taskTitle" required placeholder="例如：数学三角函数专项 20 题" />
+          </label>
+          <label>学科
+            <select id="taskSubject"></select>
+          </label>
+          <label>预计分钟
+            <input id="taskDuration" type="number" min="5" step="5" value="30" />
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="ghost-btn" data-close-modal="taskModal">取消</button>
+          <button type="submit" class="primary-btn">添加任务</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>注册 · 陶可馨高考错题学习站</title>
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="auth-brand-mark">📚</div>
+        <div>
+          <h1>陶可馨错题集</h1>
+          <p>高考智能复习站</p>
+        </div>
+      </div>
+      <h2>创建账号</h2>
+      <p class="auth-sub">家长和妹妹可以分别注册，登录后共用同一份学习数据。</p>
+      <div class="auth-error" id="authError"></div>
+      <form id="registerForm">
+        <div class="field">
+          <label for="username">用户名</label>
+          <input id="username" name="username" type="text" autocomplete="username" placeholder="3-30 个字符" required />
+        </div>
+        <div class="field">
+          <label for="password">密码</label>
+          <input id="password" name="password" type="password" autocomplete="new-password" placeholder="至少 6 位" required />
+        </div>
+        <div class="field">
+          <label for="role">账号身份</label>
+          <select id="role" name="role">
+            <option value="student">我是学生</option>
+            <option value="parent">我是家长</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="inviteCode">邀请码</label>
+          <input id="inviteCode" name="inviteCode" type="text" placeholder="请输入家庭邀请码" required />
+        </div>
+        <button class="auth-btn" id="submitBtn" type="submit">注册并登录</button>
+      </form>
+      <div class="auth-switch">
+        已有账号？<a href="/login">返回登录</a>
+      </div>
+      <div class="auth-note">
+        家长和妹妹使用同一个邀请码即可。登录后看到的是同一套错题与学习计划，方便家长每天同步录入和查看进度。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("registerForm");
+    const errorBox = document.getElementById("authError");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.add("show");
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      errorBox.classList.remove("show");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "注册中…";
+
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value,
+            role: document.getElementById("role").value,
+            invite_code: document.getElementById("inviteCode").value.trim(),
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || "注册失败");
+        }
+        window.location.href = "/";
+      } catch (err) {
+        showError(err.message || "网络异常，请稍后重试");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "注册并登录";
+      }
+    });
+  </script>
+</body>
+</html>
